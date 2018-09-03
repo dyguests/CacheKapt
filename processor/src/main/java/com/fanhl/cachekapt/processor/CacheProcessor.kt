@@ -46,43 +46,7 @@ class CacheProcessor : AbstractProcessor() {
             elementMap[elemenet.enclosingElement]?.add(elemenet) ?: also { elementMap[elemenet.enclosingElement] = mutableListOf(elemenet) }
         }
 
-        elementMap.forEach { clazz, fields ->
-            val className = clazz.simpleName
-            FileSpec.builder(elementUtils.getPackageOf(clazz).asType().toString(), "$className\$CacheExt")
-//                .addAliasedImport(clazz )
-                .apply {
-                    fields?.forEach { field ->
-                        val fieldName = field.simpleName
-                        addProperty(
-                            PropertySpec.varBuilder("${fieldName}Cache", String::class)
-                                .addKdoc("Cache extension for $className.$fieldName\n")
-                                .receiver(clazz.asType().asTypeName())
-                                .getter(
-                                    FunSpec.getterBuilder()
-                                        .addStatement("val a=1")
-                                        .addComment("${clazz}")
-                                        .addComment("${clazz.asType().asTypeName()}")
-                                        .addStatement("return \"1\"")
-                                        .build()
-                                )
-                                .setter(
-                                    FunSpec.setterBuilder()
-                                        .addParameter(
-//                                            ParameterSpec.get(field as VariableElement)
-                                            "value", String::class
-                                        )
-                                        .addStatement("val a=1")
-                                        .build()
-                                )
-                                .build()
-                        )
-                    }
-                }
-                .build()
-//                .writeTo(File(processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]))
-                .writeTo(sourceLocation)
-
-        }
+        elementMap.forEach(::generateClass)
 
 //        createGeneratedClass(roundEnv)
 
@@ -92,8 +56,54 @@ class CacheProcessor : AbstractProcessor() {
     override fun getSupportedAnnotationTypes() = mutableSetOf(Cache::class.java.canonicalName)
 
     /**
+     * 生成对应class的所有扩展
+     */
+    private fun generateClass(clazz: Element, fields: MutableList<Element>?) {
+        val className = clazz.simpleName
+        FileSpec.builder(elementUtils.getPackageOf(clazz).asType().toString(), "$className\$CacheExt")
+            .apply {
+                fields?.forEach { field -> generateProperty(this@apply, field) }
+            }
+            .build()
+            .writeTo(sourceLocation)
+    }
+
+    /**
+     * 生成class中对应property的扩展
+     */
+    private fun generateProperty(builder: FileSpec.Builder, field: Element) {
+        val clazz = field.enclosingElement
+        val className = clazz.simpleName
+        val fieldName = field.simpleName
+        builder.addProperty(
+            PropertySpec.varBuilder("${fieldName}Cache", String::class)
+                .addKdoc("Cache extension for $className.$fieldName\n")
+                .receiver(clazz.asType().asTypeName())
+                .getter(
+                    FunSpec.getterBuilder()
+                        .addStatement("val a=1")
+                        .addComment("${clazz}")
+                        .addComment("${clazz.asType().asTypeName()}")
+                        .addStatement("return \"1\"")
+                        .build()
+                )
+                .setter(
+                    FunSpec.setterBuilder()
+                        .addParameter(
+                            //                                            ParameterSpec.get(field as VariableElement)
+                            "value", String::class
+                        )
+                        .addStatement("val a=1")
+                        .build()
+                )
+                .build()
+        )
+    }
+
+    /**
      * 这只是用来测试的方法
      */
+    @Deprecated("这个只是用来测试的")
     private fun createGeneratedClass(roundEnv: RoundEnvironment?) {
         //last
         val builder = StringBuilder()
