@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         btn_counter.setOnClickListener { tv_counter.text = "counter:$count" }
         btn_counter.callOnClick()
 
-
+        countCache
     }
 }
 
@@ -42,3 +42,4 @@ var MainActivity.countCache22: Int
     set(value) {
         count = value
     }
+

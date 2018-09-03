@@ -5,6 +5,7 @@ import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.asTypeName
 import java.io.File
 import java.io.IOException
 import javax.annotation.processing.*
@@ -21,6 +22,17 @@ import javax.lang.model.element.TypeElement
 @SupportedOptions(CacheProcessor.KAPT_KOTLIN_GENERATED_OPTION_NAME)
 class CacheProcessor : AbstractProcessor() {
     private val elementUtils by lazy { processingEnv.elementUtils }
+    private val typeUtils by lazy { processingEnv.typeUtils }
+
+    /**
+     * 源码生成位置.
+     */
+    private val sourceLocation by lazy {
+        val infoFile = processingEnv.filer.createSourceFile("package-info", null)
+        val out = infoFile.openWriter()
+        out.close()
+        File(infoFile.name).parentFile
+    }
 
     override fun process(set: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment?): Boolean {
         //获取所有有@Cache的元素
@@ -37,16 +49,19 @@ class CacheProcessor : AbstractProcessor() {
         elementMap.forEach { clazz, fields ->
             val className = clazz.simpleName
             FileSpec.builder(elementUtils.getPackageOf(clazz).asType().toString(), "$className\$CacheExt")
+//                .addAliasedImport(clazz )
                 .apply {
                     fields?.forEach { field ->
                         val fieldName = field.simpleName
                         addProperty(
                             PropertySpec.varBuilder("${fieldName}Cache", String::class)
                                 .addKdoc("Cache extension for $className.$fieldName\n")
-                                .receiver(String::class)
+                                .receiver(clazz.asType().asTypeName())
                                 .getter(
                                     FunSpec.getterBuilder()
                                         .addStatement("val a=1")
+                                        .addComment("${clazz}")
+                                        .addComment("${clazz.asType().asTypeName()}")
                                         .addStatement("return \"1\"")
                                         .build()
                                 )
@@ -61,18 +76,15 @@ class CacheProcessor : AbstractProcessor() {
                                 )
                                 .build()
                         )
-//                        addFunction(
-//                            FunSpec.builder("getName")
-//                                .addStatement("val a=1")
-//                                .addKdoc("Cache extension for $className.$fieldName\n")
-//                                .addStatement("return \"World\"")
-//                                .build()
-//                        )
                     }
                 }
                 .build()
-                .writeTo(File(processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]))
+//                .writeTo(File(processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]))
+                .writeTo(sourceLocation)
+
         }
+
+//        createGeneratedClass(roundEnv)
 
         return true
     }
