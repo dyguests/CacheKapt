@@ -31,36 +31,3 @@ class MainActivity : AppCompatActivity() {
         countCache
     }
 }
-
-fun MainActivity.loadCount() {
-    count = 20
-}
-
-var MainActivity.countCache22: Int
-    get() {
-        //todo
-        return count
-    }
-    set(value) {
-        count = value
-    }
-
-interface A {
-    var a: Int
-}
-
-open class B : A {
-    override var a: Int = 0
-        get() {
-            //print xxx
-            return a
-        }
-}
-
-class C : B() {
-    override var a: Int = 0
-        get() {
-            //print yyy
-            return super.a
-        }
-}
