@@ -17,6 +17,8 @@ class MainActivity : AppCompatActivity() {
 
     @Cache
     val test1 = 0
+    @Cache
+    val test2 = false
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,3 +45,22 @@ var MainActivity.countCache22: Int
         count = value
     }
 
+interface A {
+    var a: Int
+}
+
+open class B : A {
+    override var a: Int = 0
+        get() {
+            //print xxx
+            return a
+        }
+}
+
+class C : B() {
+    override var a: Int = 0
+        get() {
+            //print yyy
+            return super.a
+        }
+}

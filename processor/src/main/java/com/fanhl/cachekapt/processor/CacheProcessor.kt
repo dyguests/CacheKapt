@@ -85,7 +85,7 @@ class CacheProcessor : AbstractProcessor() {
                         .addStatement("val a=1")
                         .addComment("${clazz}")
                         .addComment("${clazz.asType().asTypeName()}")
-                        .addStatement("return 1")
+                        .addStatement("return $fieldName")
                         .build()
                 )
                 .setter(
