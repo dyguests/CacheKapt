@@ -9,7 +9,7 @@ import javax.lang.model.element.TypeElement
  * 注解实现
  */
 class CacheProcessor : AbstractProcessor() {
-    override fun process(p0: MutableSet<out TypeElement>?, p1: RoundEnvironment?): Boolean {
+    override fun process(set: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment?): Boolean {
         return true
     }
 
