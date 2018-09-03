@@ -4,11 +4,12 @@ import com.fanhl.cachekapt.annotation.Cache
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.TypeSpec
 import java.io.File
 import java.io.IOException
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
+import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 
 /**
@@ -18,23 +19,29 @@ import javax.lang.model.element.TypeElement
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedOptions(CacheProcessor.KAPT_KOTLIN_GENERATED_OPTION_NAME)
 class CacheProcessor : AbstractProcessor() {
+    private val elementUtils by lazy { processingEnv.elementUtils }
+
     override fun process(set: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment?): Boolean {
-        roundEnv?.getElementsAnnotatedWith(Cache::class.java)?.forEach {
-            val fileName = "Cache_Test1"
-            val file = FileSpec.builder("com.fanhl.pack1", fileName)
-                .addType(
-                    TypeSpec.classBuilder(fileName)
-                        .addFunction(
-                            FunSpec.builder("getName")
-                                .addStatement("return \"World\"")
-                                .build()
-                        )
+        //获取所有有@Cache的元素
+        val matchedElements = roundEnv?.getElementsAnnotatedWith(Cache::class.java)
+            ?.filter { it.kind == ElementKind.FIELD }
+            ?.takeIf { it.isNotEmpty() } ?: return true
+
+        // map: clazz -> list(element)
+        val elementMap = HashMap<Element, MutableList<Element>?>()
+        matchedElements.forEach { elemenet ->
+            elementMap[elemenet.enclosingElement]?.add(elemenet) ?: also { elementMap[elemenet.enclosingElement] = mutableListOf(elemenet) }
+        }
+
+        elementMap.forEach { clazz, fields ->
+            FileSpec.builder(elementUtils.getPackageOf(clazz).asType().toString(), "${clazz.simpleName}\$CacheExt")
+                .addFunction(
+                    FunSpec.builder("getName")
+                        .addStatement("return \"World\"")
                         .build()
                 )
                 .build()
-
-            val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
-            file.writeTo(File(kaptKotlinGeneratedDir, "$fileName.kt"))
+                .writeTo(File(processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]))
         }
 
         return true

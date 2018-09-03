@@ -9,7 +9,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     @Cache
-    private var count = 0
+    var count = 0
         get() {
             field++
             return field
@@ -22,5 +22,19 @@ class MainActivity : AppCompatActivity() {
 
         btn_counter.setOnClickListener { tv_counter.text = "counter:$count" }
         btn_counter.callOnClick()
+
     }
 }
+
+fun MainActivity.loadCount() {
+    count = 20
+}
+
+var MainActivity.countCache: Int
+    get() {
+        //todo
+        return count
+    }
+    set(value) {
+        count = value
+    }
