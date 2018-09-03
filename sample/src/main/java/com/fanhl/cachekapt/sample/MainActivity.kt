@@ -34,7 +34,7 @@ fun MainActivity.loadCount() {
     count = 20
 }
 
-var MainActivity.countCache: Int
+var MainActivity.countCache22: Int
     get() {
         //todo
         return count

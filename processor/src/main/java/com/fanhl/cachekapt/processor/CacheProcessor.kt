@@ -42,6 +42,8 @@ class CacheProcessor : AbstractProcessor() {
                         val fieldName = field.simpleName
                         addProperty(
                             PropertySpec.varBuilder("${fieldName}Cache", String::class)
+                                .addKdoc("Cache extension for $className.$fieldName\n")
+                                .receiver(String::class)
                                 .getter(
                                     FunSpec.getterBuilder()
                                         .addStatement("val a=1")
