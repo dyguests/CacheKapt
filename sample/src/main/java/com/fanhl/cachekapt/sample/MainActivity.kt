@@ -3,11 +3,12 @@ package com.fanhl.cachekapt.sample
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import com.fanhl.cachekapt.annotation.Cache
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-
+    @Cache
     private var count = 0
         get() {
             field++
