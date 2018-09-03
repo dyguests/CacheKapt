@@ -75,8 +75,9 @@ class CacheProcessor : AbstractProcessor() {
         val clazz = field.enclosingElement
         val className = clazz.simpleName
         val fieldName = field.simpleName
+
         builder.addProperty(
-            PropertySpec.varBuilder("${fieldName}Cache", String::class)
+            PropertySpec.varBuilder("${fieldName}Cache", field.asType().asTypeName())
                 .addKdoc("Cache extension for $className.$fieldName\n")
                 .receiver(clazz.asType().asTypeName())
                 .getter(
@@ -84,15 +85,12 @@ class CacheProcessor : AbstractProcessor() {
                         .addStatement("val a=1")
                         .addComment("${clazz}")
                         .addComment("${clazz.asType().asTypeName()}")
-                        .addStatement("return \"1\"")
+                        .addStatement("return 1")
                         .build()
                 )
                 .setter(
                     FunSpec.setterBuilder()
-                        .addParameter(
-                            //                                            ParameterSpec.get(field as VariableElement)
-                            "value", String::class
-                        )
+                        .addParameter("value", field.asType().asTypeName())
                         .addStatement("val a=1")
                         .build()
                 )
