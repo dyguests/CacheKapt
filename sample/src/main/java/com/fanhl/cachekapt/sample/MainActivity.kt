@@ -15,6 +15,9 @@ class MainActivity : AppCompatActivity() {
             return field
         }
 
+    @Cache
+    val test1 = 0
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
         btn_counter.setOnClickListener { tv_counter.text = "counter:$count" }
         btn_counter.callOnClick()
+
 
     }
 }

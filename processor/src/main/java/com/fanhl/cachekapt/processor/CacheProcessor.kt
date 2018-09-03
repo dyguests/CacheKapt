@@ -4,6 +4,7 @@ import com.fanhl.cachekapt.annotation.Cache
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.PropertySpec
 import java.io.File
 import java.io.IOException
 import javax.annotation.processing.*
@@ -34,12 +35,39 @@ class CacheProcessor : AbstractProcessor() {
         }
 
         elementMap.forEach { clazz, fields ->
-            FileSpec.builder(elementUtils.getPackageOf(clazz).asType().toString(), "${clazz.simpleName}\$CacheExt")
-                .addFunction(
-                    FunSpec.builder("getName")
-                        .addStatement("return \"World\"")
-                        .build()
-                )
+            val className = clazz.simpleName
+            FileSpec.builder(elementUtils.getPackageOf(clazz).asType().toString(), "$className\$CacheExt")
+                .apply {
+                    fields?.forEach { field ->
+                        val fieldName = field.simpleName
+                        addProperty(
+                            PropertySpec.varBuilder("${fieldName}Cache", String::class)
+                                .getter(
+                                    FunSpec.getterBuilder()
+                                        .addStatement("val a=1")
+                                        .addStatement("return \"1\"")
+                                        .build()
+                                )
+                                .setter(
+                                    FunSpec.setterBuilder()
+                                        .addParameter(
+//                                            ParameterSpec.get(field as VariableElement)
+                                            "value", String::class
+                                        )
+                                        .addStatement("val a=1")
+                                        .build()
+                                )
+                                .build()
+                        )
+//                        addFunction(
+//                            FunSpec.builder("getName")
+//                                .addStatement("val a=1")
+//                                .addKdoc("Cache extension for $className.$fieldName\n")
+//                                .addStatement("return \"World\"")
+//                                .build()
+//                        )
+                    }
+                }
                 .build()
                 .writeTo(File(processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]))
         }
