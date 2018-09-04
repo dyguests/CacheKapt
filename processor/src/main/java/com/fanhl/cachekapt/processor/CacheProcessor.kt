@@ -1,6 +1,7 @@
 package com.fanhl.cachekapt.processor
 
 import com.fanhl.cachekapt.annotation.Cache
+import com.fanhl.cachekapt.helper.Cacher
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -61,6 +62,7 @@ class CacheProcessor : AbstractProcessor() {
     private fun generateClass(clazz: Element, fields: MutableList<Element>?) {
         val className = clazz.simpleName
         FileSpec.builder(elementUtils.getPackageOf(clazz).asType().toString(), "$className\$CacheExt")
+            .addAliasedImport(Cacher::class, "Cacher")
             .apply {
                 fields?.forEach { field -> generateProperty(this@apply, field) }
             }
@@ -82,16 +84,20 @@ class CacheProcessor : AbstractProcessor() {
                 .receiver(clazz.asType().asTypeName())
                 .getter(
                     FunSpec.getterBuilder()
-                        .addStatement("val a=1")
-                        .addComment("${clazz}")
-                        .addComment("${clazz.asType().asTypeName()}")
+                        .addCode(
+                            "val result: Int = Cacher.load(\"$field\")\n" +
+                                    "if ($field != result) {\n" +
+                                    "    $field = result\n" +
+                                    "}\n"
+                        )
                         .addStatement("return $fieldName")
                         .build()
                 )
                 .setter(
                     FunSpec.setterBuilder()
                         .addParameter("value", field.asType().asTypeName())
-                        .addStatement("val a=1")
+                        .addStatement("Cacher.save(value, \"$field\")")
+                        .addStatement("$field = value")
                         .build()
                 )
                 .build()

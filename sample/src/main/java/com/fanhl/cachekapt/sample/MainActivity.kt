@@ -15,10 +15,10 @@ class MainActivity : AppCompatActivity() {
             return field
         }
 
-    @Cache
-    val test1 = 0
-    @Cache
-    val test2 = false
+//    @Cache
+//    val test1 = 0
+//    @Cache
+//    val test2 = false
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
